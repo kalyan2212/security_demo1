@@ -110,14 +110,14 @@ def get_weather_data(lat, lon):
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching weather data: {e}")
         return {
-            'error': str(e),
+            'error': 'Unable to fetch weather data',
             'temperature': 'N/A',
             'conditions': 'Error fetching weather data'
         }
     except Exception as e:
         logger.error(f"Unexpected error in get_weather_data: {e}")
         return {
-            'error': str(e),
+            'error': 'Unable to process weather data',
             'temperature': 'N/A',
             'conditions': 'Error processing weather data'
         }
@@ -208,13 +208,13 @@ def route_weather():
             logger.error(f"Google Maps API error: {e}")
             return jsonify({
                 'success': False,
-                'error': f'Google Maps API error: {str(e)}'
+                'error': 'Google Maps API error. Please check your API key and try again.'
             }), 500
         except Exception as e:
             logger.error(f"Error getting directions: {e}")
             return jsonify({
                 'success': False,
-                'error': f'Error calculating route: {str(e)}'
+                'error': 'Error calculating route. Please verify your addresses and try again.'
             }), 500
         
         # Extract waypoints from the route
@@ -309,7 +309,7 @@ def route_weather():
         logger.error(f"Unexpected error in route_weather: {e}")
         return jsonify({
             'success': False,
-            'error': f'Internal server error: {str(e)}'
+            'error': 'Internal server error. Please try again later.'
         }), 500
 
 @app.errorhandler(404)
