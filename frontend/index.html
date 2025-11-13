@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Route Checker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            margin: 20px 0;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #c33;
+            display: none;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .route-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .route-info h2 {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .route-details {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .route-detail {
+            margin: 5px;
+        }
+
+        .route-detail strong {
+            display: block;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .route-detail span {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .weather-cards {
+            display: grid;
+            gap: 20px;
+        }
+
+        .weather-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .weather-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .location-name {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .weather-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .weather-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .weather-label {
+            color: #666;
+            font-size: 0.9em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .weather-value {
+            color: #333;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .temperature {
+            font-size: 2em;
+            color: #667eea;
+        }
+
+        .coordinates {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .weather-info {
+                grid-template-columns: 1fr;
+            }
+
+            .route-details {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤️ Weather Route Checker</h1>
+        <p class="subtitle">Check weather conditions along your route</p>
+
+        <form id="routeForm">
+            <div class="form-group">
+                <label for="startAddress">Starting Location</label>
+                <input 
+                    type="text" 
+                    id="startAddress" 
+                    name="startAddress" 
+                    placeholder="e.g., New York, NY"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="endAddress">Destination</label>
+                <input 
+                    type="text" 
+                    id="endAddress" 
+                    name="endAddress" 
+                    placeholder="e.g., Boston, MA"
+                    required
+                >
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" id="submitBtn">Get Weather Route</button>
+            </div>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #667eea;">Calculating route and fetching weather data...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="results" id="results">
+            <div class="route-info" id="routeInfo">
+                <h2>Route Information</h2>
+                <div class="route-details">
+                    <div class="route-detail">
+                        <strong>Distance</strong>
+                        <span id="distance">-</span>
+                    </div>
+                    <div class="route-detail">
+                        <strong>Duration</strong>
+                        <span id="duration">-</span>
+                    </div>
+                    <div class="route-detail">
+                        <strong>Waypoints</strong>
+                        <span id="waypoints">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: #667eea; margin-bottom: 20px; font-size: 1.5em;">Weather Along Your Route</h2>
+            <div class="weather-cards" id="weatherCards"></div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration - Update this to match your backend URL
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000'
+            : `${window.location.protocol}//${window.location.hostname}:5000`;
+
+        const form = document.getElementById('routeForm');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const results = document.getElementById('results');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const startAddress = document.getElementById('startAddress').value.trim();
+            const endAddress = document.getElementById('endAddress').value.trim();
+
+            if (!startAddress || !endAddress) {
+                showError('Please enter both starting location and destination');
+                return;
+            }
+
+            // Reset UI
+            hideError();
+            hideResults();
+            showLoading();
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/route_weather`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        start_address: startAddress,
+                        end_address: endAddress
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fetch route weather data');
+                }
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message || 'Failed to connect to the server. Please try again.');
+            } finally {
+                hideLoading();
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showLoading() {
+            loading.style.display = 'block';
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        function hideResults() {
+            results.style.display = 'none';
+        }
+
+        function displayResults(data) {
+            // Update route info
+            document.getElementById('distance').textContent = data.distance || 'N/A';
+            document.getElementById('duration').textContent = data.duration || 'N/A';
+            document.getElementById('waypoints').textContent = data.weather_data.length;
+
+            // Display weather cards
+            const weatherCards = document.getElementById('weatherCards');
+            weatherCards.innerHTML = '';
+
+            data.weather_data.forEach((item, index) => {
+                const card = createWeatherCard(item, index);
+                weatherCards.appendChild(card);
+            });
+
+            // Show results
+            results.style.display = 'block';
+            
+            // Scroll to results
+            results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function createWeatherCard(item, index) {
+            const card = document.createElement('div');
+            card.className = 'weather-card';
+
+            const locationText = stripHtmlTags(item.location);
+            const weather = item.weather;
+
+            card.innerHTML = `
+                <div class="location-name">
+                    ${index === 0 ? '🟢 ' : ''}
+                    ${locationText}
+                    ${index === 0 ? ' (Start)' : ''}
+                </div>
+                <div class="coordinates">
+                    📍 ${item.lat.toFixed(4)}, ${item.lon.toFixed(4)}
+                </div>
+                <div class="weather-info">
+                    <div class="weather-item">
+                        <span class="weather-label">Temperature</span>
+                        <span class="weather-value temperature">${weather.temperature || 'N/A'}</span>
+                    </div>
+                    <div class="weather-item">
+                        <span class="weather-label">Conditions</span>
+                        <span class="weather-value">${weather.conditions || 'N/A'}</span>
+                    </div>
+                    ${weather.humidity ? `
+                    <div class="weather-item">
+                        <span class="weather-label">Humidity</span>
+                        <span class="weather-value">${weather.humidity}</span>
+                    </div>
+                    ` : ''}
+                    ${weather.wind_speed ? `
+                    <div class="weather-item">
+                        <span class="weather-label">Wind Speed</span>
+                        <span class="weather-value">${weather.wind_speed}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                ${weather.description ? `
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0; color: #666; font-style: italic;">
+                    ${weather.description}
+                </div>
+                ` : ''}
+                ${weather.error ? `
+                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; color: #856404; font-size: 0.9em;">
+                    ⚠️ ${weather.error}
+                </div>
+                ` : ''}
+            `;
+
+            return card;
+        }
+
+        function stripHtmlTags(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        // Add some sample addresses for demo purposes
+        window.addEventListener('load', () => {
+            console.log('Weather Route Checker loaded');
+            console.log('API Base URL:', API_BASE_URL);
+        });
+    </script>
+</body>
+</html>
